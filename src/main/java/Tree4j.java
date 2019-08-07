@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 
 public class Tree4j {
 
-    String[] fileTypeStrs = new String[]{"BMP","CHM","Cab","GIF","HTM","ISO","JPG","Lion","MF","MOBI","MRK","PDB","PDF","PNG","RAR","SnowLeopard","TXT","Txt","asc","azw","bin","bmp","caj","chm","cif","cip","class","crdownload","created","css","csv","dat","db","directoryStoreFile","doc","docx","donotpresent","downloading","dropbox","epub","evt","exe","flv","gif","hhc","htm","html","ico","indexArrays","indexBigDates","indexCompactDirectory","indexDirectory","indexGroups","indexHead","indexIds","indexPositionTable","indexPositions","indexPostings","indexTermIds","indexUpdates","ini","iso","jpg","json","kll","lnk","loc","mbp","md","mid","mobi","modified","msi","opf","pdf","pdg","plist","png","ppt","prc","rar","rtf","sgdownload","shadow","shadowIndexArrays","shadowIndexCompactDirectory","shadowIndexDirectory","shadowIndexGroups","shadowIndexHead","shadowIndexPositionTable","shadowIndexTermIds","shtml","state","svg","tar","thm","tmp","torrent","txt","updates","url","wav","wpt","xls","xlsx","xml","zip"};
+    String[] fileTypeStrs = new String[]{"BMP","CHM","Cab","GIF","HTM","ISO","JPG","Lion","MF","MOBI","MRK","PDB","PDF","PNG","RAR","SnowLeopard","TXT","Txt","asc","azw","azw3","bin","bmp","caj","chm","cif","cip","class","crdownload","created","css","csv","dat","db","directoryStoreFile","doc","docx","donotpresent","downloading","dropbox","epub","evt","exe","flv","gif","hhc","htm","html","ico","indexArrays","indexBigDates","indexCompactDirectory","indexDirectory","indexGroups","indexHead","indexIds","indexPositionTable","indexPositions","indexPostings","indexTermIds","indexUpdates","ini","iso","jpg","json","kll","lnk","loc","mbp","md","mid","mobi","modified","msi","opf","pdf","pdg","plist","png","ppt","prc","rar","rtf","sgdownload","shadow","shadowIndexArrays","shadowIndexCompactDirectory","shadowIndexDirectory","shadowIndexGroups","shadowIndexHead","shadowIndexPositionTable","shadowIndexTermIds","shtml","state","svg","tar","thm","tmp","torrent","txt","updates","url","wav","wpt","xls","xlsx","xml","zip"};
 
     Set fileType;
 
@@ -64,7 +64,7 @@ public class Tree4j {
     private void fileOperate(File file) throws IOException {
         //System.out.println("fileName: [" + file.getName()  + "]");
 
-        //V1
+        //V1 查看全部文件
 //        RedisPool.getJedis().incr(file.getName());
 
         //将文件分类
@@ -77,11 +77,37 @@ public class Tree4j {
 //        System.out.println( "file path: " + file.getPath() + file.getName());
         if(fileType.contains(fileNameEnd)){
             String shell = "mv "
-                    + file.getPath().replaceAll(" ", "\\\\ ").replaceAll("\\(", "\\\\(")
-                    .replaceAll("\\)", "\\\\)")
+                    + file.getPath()
+                    /*处理shell 通配符*/
+                    .replaceAll("\\*", "\\\\\\*")
+                    .replaceAll("\\?", "\\\\\\?")
+                    .replaceAll("\\]", "\\\\\\]")
+                    .replaceAll("\\[", "\\\\\\[")
+                    .replaceAll("!", "\\\\!")
+                    .replaceAll("\\{", "\\\\\\{")
+                    .replaceAll("\\}", "\\\\\\}")
+                    /* 处理shell 元字符*/
+                    .replaceAll("=", "\\\\=")
+                    .replaceAll("\\$", "\\\\\\$")
+                    .replaceAll(">", "\\\\>")
+                    .replaceAll("<", "\\\\<")
+                    .replaceAll("\\|", "\\\\\\|")
+                    .replaceAll("&", "\\\\&")
+                    .replaceAll(";", "\\\\;")
+                    .replaceAll("~", "\\\\~")
+                    .replaceAll("\\)", "\\\\\\)")
+                    .replaceAll(" ", "\\\\ ")
+                    .replaceAll("\\(", "\\\\\\(")
+                    /*转义符*/
+                    .replaceAll("'", "\\\\'")
+                    .replaceAll("\"", "\\\\\"")
+                    .replaceAll("`", "\\\\`")
+
                     + " " + newFileDir + fileNameEnd;
-//            System.out.println(shell);
+            System.out.println(shell);
             runShell(shell);
+        }else {
+            System.out.println("没有归宿的文件：" + fileName);
         }
 
 
@@ -91,6 +117,8 @@ public class Tree4j {
     public static void main(String[] args) throws IOException {
         new Tree4j().accept(new File("/Volumes/铛个里个铛铛铛/kindle"));
 
+
+//        System.out.println("sdssdsd*www.cs".replaceAll("\\*", "\\\\\\*"));
 //        runShell( "ls");
 
     }
