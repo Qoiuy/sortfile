@@ -10,7 +10,25 @@ public class Tree4j {
 
     private static FileFilter filter ;
 
-    String newFileDir = "/Volumes/铛个里个铛铛铛/byType/";
+    String targetFileDir = "/Volumes/铛个里个铛铛铛/byType/";
+
+
+    /**
+     * 打印静态字段 将文件内容存储到...redis吧
+     * @param file 具体 文件
+     */
+    private void fileOperate(File file) throws IOException {
+
+        //V1 查看全部文件
+//        RedisPool.getJedis().incr(file.getName());
+
+        //V2 根据文件类型分类。
+//        sortFileByFileType(file);
+
+        //V3 根据文件分类 如果文件存在 判断md5值 如果md5存在则删除原来的文件
+        sortFileByFileTypeAndMD5(file);
+
+    }
 
     class JavaOrDirFilter implements FileFilter {
         private Pattern pattern ;
@@ -32,7 +50,7 @@ public class Tree4j {
     Tree4j(){
         String regex = ".*";
         filter = new JavaOrDirFilter(regex);
-        fileType = new HashSet<String>(Arrays.asList(fileTypeStrs));
+        fileType = new HashSet<>(Arrays.asList(fileTypeStrs));
     }
 
     public void accept(File currentFile) throws IOException {
@@ -57,52 +75,58 @@ public class Tree4j {
         }
     }
 
-    /**
-     * 打印静态字段 将文件内容存储到...redis吧
-     * @param file 具体 文件
-     */
-    private void fileOperate(File file) throws IOException {
-        //System.out.println("fileName: [" + file.getName()  + "]");
 
-        //V1 查看全部文件
-        RedisPool.getJedis().incr(file.getName());
 
-//        sortFileByFileType(file);
+    private void sortFileByFileTypeAndMD5(File file) throws IOException{
 
+        String fileNameSuffix = getFileSuffix(file.getName());
+        if(fileNameSuffix == null) return;
+        if(!fileType.contains(fileNameSuffix)) return;
+
+        File target = new File(targetFileDir + fileNameSuffix + "/" + file.getName() );
+
+        if(!target.exists()) mv( file.getPath(), fileNameSuffix);
+
+        if(md5(target.getPath()).equals( md5(file.getPath())) ){
+            file.delete();
+        }else {
+            mv(file.getPath(),
+                    fileNameSuffix + "/"+ randomName(fileNameSuffix, file.getName()));
+        }
 
     }
 
-    private String calculateMd5(String name){
-return null;
+    private static String randomName(String fileNameSuffix, String fileName) {
+        return fileName.replace("." + fileNameSuffix,   new Random().nextInt(1000) + "." + fileNameSuffix );
     }
 
-    /**
-     * 根据文件类型 将文件分类
-     */
+    private String md5(String path) throws IOException {
+        //md5 ~/tmp ~/tmp1 | sed "s/^.*= //g"
+        return runShell("md5 " + formatStringInOrderToShellCanUse(path) + " | sed \"s/^.*= //g\" ");
+    }
+
     private void sortFileByFileType(File file) throws IOException {
 
-        String fileName = file.getName();
-        String[] fileNameSnippet = fileName.split("\\.");
-        if(fileNameSnippet.length <= 1) return ;
-        String fileNameSuffix = fileNameSnippet[fileNameSnippet.length - 1];
+        String fileNameSuffix = getFileSuffix(file.getName());
+        if(fileNameSuffix == null) return;
 
-
-//        System.out.println( "file path: " + file.getPath() + file.getName());
         if(fileType.contains(fileNameSuffix)){
-            String shell = "mv "
-                    + formatStringInOrderToShellCanUse(file.getPath())
-                    + " " + newFileDir + fileNameSuffix;
-            System.out.println(shell);
-            runShell(shell);
-        }else {
-            System.out.println("没有归宿的文件：" + fileName);
+            mv(file.getPath(), fileNameSuffix);
         }
     }
 
-    /**
-     * 为了shell可以使用 去格式化字符串
-     */
-    private String formatStringInOrderToShellCanUse(String name) {
+    private void mv(String sourcePath, String dirName) throws IOException {
+        String shell = "mv " + sourcePath + " " + targetFileDir + dirName;
+        runShell(formatStringInOrderToShellCanUse(shell));
+    }
+
+    private String getFileSuffix(String fileName){
+        String[] fileNameSnippet = fileName.split("\\.");
+        if(fileNameSnippet.length <= 1) return null;
+        return fileNameSnippet[fileNameSnippet.length - 1];
+    }
+
+    private static String formatStringInOrderToShellCanUse(String name) {
         return name
         /*处理shell 通配符*/
         .replaceAll("\\*", "\\\\\\*")
@@ -134,13 +158,12 @@ return null;
     public static void main(String[] args) throws IOException {
         new Tree4j().accept(new File("/Volumes/铛个里个铛铛铛/kindle"));
 
-
-//        System.out.println("sdssdsd*www.cs".replaceAll("\\*", "\\\\\\*"));
+//        System.out.println(randomName("exe", "tmp.exe"));
 //        runShell( "ls");
 
     }
 
-    private static void runShell( String shell) throws IOException {
+    private static String runShell( String shell) throws IOException {
         String[] cmd = new String[]{"/bin/sh", "-c", shell};
         Process ps = Runtime.getRuntime().exec(cmd);
 
@@ -150,9 +173,8 @@ return null;
         while ((line = br.readLine()) != null) {
             sb.append(line).append("\n");
         }
-        String result = sb.toString();
+        return sb.toString();
 
-        System.out.println(result);
     }
 
 }
