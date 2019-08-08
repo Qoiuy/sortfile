@@ -23,7 +23,7 @@ public class Tree4j {
 //        RedisPool.getJedis().incr(file.getName());
 
         //V2 根据文件类型分类。
-//        sortFileByFileType(file);
+//        sortFileByFileType(fidle);
 
         //V3 根据文件分类 如果文件存在 判断md5值 如果md5存在则删除原来的文件
         sortFileByFileTypeAndMD5(file);
@@ -79,6 +79,7 @@ public class Tree4j {
 
     private void sortFileByFileTypeAndMD5(File file) throws IOException{
 
+        System.out.println("处理文件：" + file.getName());
         String fileNameSuffix = getFileSuffix(file.getName());
         if(fileNameSuffix == null) return;
         if(!fileType.contains(fileNameSuffix)) return;
@@ -116,8 +117,8 @@ public class Tree4j {
     }
 
     private void mv(String sourcePath, String dirName) throws IOException {
-        String shell = "mv " + sourcePath + " " + targetFileDir + dirName;
-        runShell(formatStringInOrderToShellCanUse(shell));
+        String shell = "mv " + formatStringInOrderToShellCanUse(sourcePath) + " " + targetFileDir + formatStringInOrderToShellCanUse(dirName);
+        runShell(shell);
     }
 
     private String getFileSuffix(String fileName){
@@ -148,8 +149,9 @@ public class Tree4j {
         .replaceAll("\\)", "\\\\\\)")
         .replaceAll(" ", "\\\\ ")
         .replaceAll("\\(", "\\\\\\(")
+//        .replaceAll("-", "\\\\-")
         /*转义符*/
-        .replaceAll("'", "\\\\'")
+//        .replaceAll("'", "\\\\'")
         .replaceAll("\"", "\\\\\"")
         .replaceAll("`", "\\\\`");
     }
@@ -164,6 +166,7 @@ public class Tree4j {
     }
 
     private static String runShell( String shell) throws IOException {
+        System.out.println(shell);
         String[] cmd = new String[]{"/bin/sh", "-c", shell};
         Process ps = Runtime.getRuntime().exec(cmd);
 
