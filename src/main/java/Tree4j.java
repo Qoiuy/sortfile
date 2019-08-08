@@ -82,7 +82,7 @@ public class Tree4j {
 
     private void sortFileByFileTypeAndMD5(File file) throws IOException{
 
-        System.out.println("处理文件：" + file.getName());
+       // System.out.println("处理文件：" + file.getName());
         String fileNameSuffix = getFileSuffix(file.getName());
         if(fileNameSuffix == null) return;
         if(!fileType.contains(fileNameSuffix)) return;
@@ -174,7 +174,7 @@ public class Tree4j {
 
 
     public static void main(String[] args) throws IOException {
-        new Tree4j().accept(new File("/Volumes/铛个里个铛铛铛/byType/MOBI"));
+        new Tree4j().accept(new File("/Volumes/铛个里个铛铛铛/kindle"));
 
 //        System.out.println(randomName("exe", "tmp.exe"));
 //        runShell( "ls");
