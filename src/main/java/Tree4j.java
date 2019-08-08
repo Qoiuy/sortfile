@@ -65,52 +65,69 @@ public class Tree4j {
         //System.out.println("fileName: [" + file.getName()  + "]");
 
         //V1 查看全部文件
-//        RedisPool.getJedis().incr(file.getName());
+        RedisPool.getJedis().incr(file.getName());
 
-        //将文件分类
+//        sortFileByFileType(file);
+
+
+    }
+
+    private String calculateMd5(String name){
+return null;
+    }
+
+    /**
+     * 根据文件类型 将文件分类
+     */
+    private void sortFileByFileType(File file) throws IOException {
+
         String fileName = file.getName();
-        String[] fileNameS = fileName.split("\\.");
-        if(fileNameS.length <= 1) return;
-        String fileNameEnd = fileNameS[fileNameS.length - 1];
+        String[] fileNameSnippet = fileName.split("\\.");
+        if(fileNameSnippet.length <= 1) return ;
+        String fileNameSuffix = fileNameSnippet[fileNameSnippet.length - 1];
 
 
 //        System.out.println( "file path: " + file.getPath() + file.getName());
-        if(fileType.contains(fileNameEnd)){
+        if(fileType.contains(fileNameSuffix)){
             String shell = "mv "
-                    + file.getPath()
-                    /*处理shell 通配符*/
-                    .replaceAll("\\*", "\\\\\\*")
-                    .replaceAll("\\?", "\\\\\\?")
-                    .replaceAll("\\]", "\\\\\\]")
-                    .replaceAll("\\[", "\\\\\\[")
-                    .replaceAll("!", "\\\\!")
-                    .replaceAll("\\{", "\\\\\\{")
-                    .replaceAll("\\}", "\\\\\\}")
-                    /* 处理shell 元字符*/
-                    .replaceAll("=", "\\\\=")
-                    .replaceAll("\\$", "\\\\\\$")
-                    .replaceAll(">", "\\\\>")
-                    .replaceAll("<", "\\\\<")
-                    .replaceAll("\\|", "\\\\\\|")
-                    .replaceAll("&", "\\\\&")
-                    .replaceAll(";", "\\\\;")
-                    .replaceAll("~", "\\\\~")
-                    .replaceAll("\\)", "\\\\\\)")
-                    .replaceAll(" ", "\\\\ ")
-                    .replaceAll("\\(", "\\\\\\(")
-                    /*转义符*/
-                    .replaceAll("'", "\\\\'")
-                    .replaceAll("\"", "\\\\\"")
-                    .replaceAll("`", "\\\\`")
-
-                    + " " + newFileDir + fileNameEnd;
+                    + formatStringInOrderToShellCanUse(file.getPath())
+                    + " " + newFileDir + fileNameSuffix;
             System.out.println(shell);
             runShell(shell);
         }else {
             System.out.println("没有归宿的文件：" + fileName);
         }
+    }
 
-
+    /**
+     * 为了shell可以使用 去格式化字符串
+     */
+    private String formatStringInOrderToShellCanUse(String name) {
+        return name
+        /*处理shell 通配符*/
+        .replaceAll("\\*", "\\\\\\*")
+        .replaceAll("\\?", "\\\\\\?")
+        .replaceAll("\\]", "\\\\\\]")
+        .replaceAll("\\[", "\\\\\\[")
+        .replaceAll("!", "\\\\!")
+        .replaceAll("\\{", "\\\\\\{")
+        .replaceAll("\\}", "\\\\\\}")
+        /* 处理shell 元字符*/
+        .replaceAll("=", "\\\\=")
+        .replaceAll("\\$", "\\\\\\$")
+        .replaceAll(">", "\\\\>")
+        .replaceAll("<", "\\\\<")
+        .replaceAll("\\|", "\\\\\\|")
+        .replaceAll("&", "\\\\&")
+        .replaceAll(";", "\\\\;")
+        .replaceAll("~", "\\\\~")
+        .replaceAll("\\)", "\\\\\\)")
+        .replaceAll(" ", "\\\\ ")
+        .replaceAll("\\(", "\\\\\\(")
+        /*转义符*/
+        .replaceAll("'", "\\\\'")
+        .replaceAll("\"", "\\\\\"")
+        .replaceAll("`", "\\\\`");
     }
 
 
