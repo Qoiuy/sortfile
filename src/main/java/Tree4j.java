@@ -117,9 +117,17 @@ public class Tree4j {
     }
 
     private void mv(String sourcePath, String dirName) throws IOException {
+        unlock(sourcePath);
         String shell = "mv " + formatStringInOrderToShellCanUse(sourcePath) + " " + targetFileDir + formatStringInOrderToShellCanUse(dirName);
         runShell(shell);
     }
+
+    private void unlock(String path)throws IOException{
+        /*解除文件锁定*/
+        String shell = "chflags nouchg " + formatStringInOrderToShellCanUse(path);
+        runShell(shell);
+    }
+
 
     private String getFileSuffix(String fileName){
         String[] fileNameSnippet = fileName.split("\\.");
