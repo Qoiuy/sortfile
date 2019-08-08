@@ -8,6 +8,8 @@ public class Tree4j {
 
     Set fileType;
 
+    Set needheadleFile;
+
     private static FileFilter filter ;
 
     String targetFileDir = "/Volumes/铛个里个铛铛铛/byType/";
@@ -51,6 +53,7 @@ public class Tree4j {
         String regex = ".*";
         filter = new JavaOrDirFilter(regex);
         fileType = new HashSet<>(Arrays.asList(fileTypeStrs));
+        needheadleFile = new HashSet<>(Arrays.asList(MobiFile.mobis));
     }
 
     public void accept(File currentFile) throws IOException {
@@ -86,7 +89,12 @@ public class Tree4j {
 
         File target = new File(targetFileDir + fileNameSuffix + "/" + file.getName() );
 
-        if(!target.exists()) mv( file.getPath(), fileNameSuffix);
+        if(!target.exists()) {
+            if(needheadleFile.contains(file.getName())){
+                System.out.println(mv( file.getPath(), fileNameSuffix));
+            }
+
+        }
 
         if(md5(target.getPath()).equals( md5(file.getPath())) ){
             file.delete();
@@ -116,10 +124,10 @@ public class Tree4j {
         }
     }
 
-    private void mv(String sourcePath, String dirName) throws IOException {
+    private String mv(String sourcePath, String dirName) throws IOException {
         unlock(sourcePath);
         String shell = "mv " + formatStringInOrderToShellCanUse(sourcePath) + " " + targetFileDir + formatStringInOrderToShellCanUse(dirName);
-        runShell(shell);
+        return runShell(shell);
     }
 
     private void unlock(String path)throws IOException{
@@ -166,7 +174,7 @@ public class Tree4j {
 
 
     public static void main(String[] args) throws IOException {
-        new Tree4j().accept(new File("/Volumes/铛个里个铛铛铛/kindle"));
+        new Tree4j().accept(new File("/Volumes/铛个里个铛铛铛/byType/MOBI"));
 
 //        System.out.println(randomName("exe", "tmp.exe"));
 //        runShell( "ls");
@@ -174,7 +182,7 @@ public class Tree4j {
     }
 
     private static String runShell( String shell) throws IOException {
-        System.out.println(shell);
+//        System.out.println(shell);
         String[] cmd = new String[]{"/bin/sh", "-c", shell};
         Process ps = Runtime.getRuntime().exec(cmd);
 
